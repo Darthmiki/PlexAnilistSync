@@ -1,0 +1,6 @@
+PlexAPI
+requests
+simplejson
+pathlib
+lxml
+coloredlogs
