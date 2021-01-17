@@ -3,4 +3,4 @@ services:
   plex_anilist_sync:
     build: .
     container_name: plex_anilist_sync
-  restart: always
+    restart: always
