@@ -1,0 +1,16 @@
+{
+    "config": [
+        {
+            "anilist_username": "ANILIST_USERNAME",
+            "anilist_token": "ANILIST_TOKEN",
+            "plex_username": "PLEX_USERNAME",
+            "plex_password": "PLEX_PASSWORD",
+            "plex_server_dict": {
+                "PLEX_SERVER_NAME": ["PLEX_SECTION_NAME1", "PLEX_SECTION_NAME2"]
+            }
+        }
+    ],
+    "interval_in_seconds": 1800 
+}
+
+

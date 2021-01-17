@@ -144,9 +144,9 @@ class AnilistHelper:
         requests.post(url, headers=headers, json={"query": query, "variables": variables})
 
     def get_user_list(self):
-        user_list_data = self._fetch_user_list()
         all_user_anime = {}
         try:
+            user_list_data = self._fetch_user_list()
             if not user_list_data:
                 LOGGER.warning("Could not get user list from Anilist")
                 return None
