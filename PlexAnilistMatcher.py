@@ -45,6 +45,7 @@ class PlexAnilistMatcher:
         with p.open("rb") as f:
             anime_list = simplejson.load(f)["data"]
             self.anidb_anilist_mapping = {}
+            titles_buckets = {}
             for anime in anime_list:
                 anidb_url = None
                 anilist_url = None
@@ -53,11 +54,46 @@ class PlexAnilistMatcher:
                         anidb_url = source
                     if "anilist" in source:
                         anilist_url = source
+                    if anidb_url and anilist_url:
+                        continue
+                if not anidb_url or not anilist_url:
+                    if anidb_url or anilist_url:
+                        for title in [anime["title"]] + anime["synonyms"]:
+                            if title not in titles_buckets:
+                                titles_buckets[title] = []
+                            titles_buckets[title].append(anime)
+                    continue
+                self.anidb_anilist_mapping[anidb_url[anidb_url.rindex("/") + 1 :]] = anilist_url[
+                    anilist_url.rindex("/") + 1 :
+                ]
+            len_matched = len(self.anidb_anilist_mapping)
+            LOGGER.info("Found %s matching anidb and anilist entries.", len_matched)
+            LOGGER.info("Trying to match %s failed entries by title", len(titles_buckets))
+            for anime_sharing_title in titles_buckets.values():
+                anidb_url = None
+                anilist_url = None
+                if (
+                    len(anime_sharing_title) != 2
+                    or anime_sharing_title[0]["animeSeason"]["season"]
+                    != anime_sharing_title[1]["animeSeason"]["season"]
+                    or anime_sharing_title[0]["animeSeason"]["year"]
+                    != anime_sharing_title[1]["animeSeason"]["year"]
+                    or anime_sharing_title[0]["episodes"] != anime_sharing_title[1]["episodes"]
+                ):
+                    continue
+                for source in anime_sharing_title[0]["sources"] + anime_sharing_title[1]["sources"]:
+                    if "anidb" in source:
+                        anidb_url = source
+                    if "anilist" in source:
+                        anilist_url = source
+                    if anidb_url and anilist_url:
+                        continue
                 if not anidb_url or not anilist_url:
                     continue
                 self.anidb_anilist_mapping[anidb_url[anidb_url.rindex("/") + 1 :]] = anilist_url[
                     anilist_url.rindex("/") + 1 :
                 ]
+            LOGGER.info("Matched by title: %s", len(self.anidb_anilist_mapping) - len_matched)
 
     def get_tvdb_anidb_mapping(self):
         p = pathlib.Path(TVDB_ANIDB_ANIME_LIST_FILE)
@@ -74,7 +110,9 @@ class PlexAnilistMatcher:
                 if el.get("tvdbid") in self.tvdb_anidb_mapping:
                     repeated_ids.add(el.get("tvdbid"))
                 self.tvdb_anidb_mapping[el.get("tvdbid")] = el.get("anidbid")
-            LOGGER.error("TVDB ids are shared by multiple anidb entries. Removing: %s", repeated_ids)
+            LOGGER.error(
+                "TVDB ids are shared by multiple anidb entries. Removing: %s", repeated_ids
+            )
             for rl in repeated_ids:
                 self.tvdb_anidb_mapping.pop(rl)
 
