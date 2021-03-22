@@ -15,7 +15,10 @@ class PlexAnimeHelper:
 
     def get_shows_with_watched_episodes(self, server, section):
         section = self.servers[server].library.section(section)
-        return section.search(**{"episode.unwatched": False})
+        try:
+            return section.search(**{"episode.unwatched": False})
+        except:
+            return section.search()
 
     def get_watched_episodes(self, plex_entry):
         if isinstance(plex_entry, Movie):
