@@ -3,6 +3,8 @@ import simplejson as json
 import time
 import requests
 import logging
+import coloredlogs
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -12,7 +14,7 @@ class AnilistHelper:
         self.anilist_access_token = token
         self.username = username
 
-    def _fetch_user_list(self):
+    def _fetch_user_list(self, username):
         query = """
         query ($username: String) {
             MediaListCollection(userName: $username, type: ANIME) {
@@ -25,14 +27,36 @@ class AnilistHelper:
                         progress
                         status
                         repeat
+                        score
+                        startedAt {
+                                year
+                                month
+                                day
+                        }
+                        completedAt {
+                                year
+                                month
+                                day
+                        }
+                        updatedAt
+                        createdAt
                         media {
                             id
+                            idMal
                             type
                             format
                             status
                             source
                             season
+                            seasonYear
+                            seasonInt
                             episodes
+                            duration
+                            averageScore
+                            meanScore
+                            popularity
+                            trending
+                            favourites
                             startDate {
                                 year
                                 month
@@ -56,7 +80,7 @@ class AnilistHelper:
         }
         """
 
-        variables = {"username": self.username}
+        variables = {"username": username}
 
         url = "https://graphql.anilist.co"
 
@@ -79,6 +103,7 @@ class AnilistHelper:
             # Insert our variables into the query arguments
             # (id) (type: ANIME is hard-coded in the query)
             id
+            idMal
             type
             format
             status
@@ -143,10 +168,10 @@ class AnilistHelper:
 
         requests.post(url, headers=headers, json={"query": query, "variables": variables})
 
-    def get_user_list(self):
+    def get_user_list(self, username):
         all_user_anime = {}
         try:
-            user_list_data = self._fetch_user_list()
+            user_list_data = self._fetch_user_list(username)
             if not user_list_data:
                 LOGGER.warning("Could not get user list from Anilist")
                 return None
@@ -157,7 +182,7 @@ class AnilistHelper:
             time.sleep(.5)
             return all_user_anime
         except Exception as exception:
-            LOGGER.error("Could not get user list from Anilist: %s", exception)
+            LOGGER.error("Could not get %s list from Anilist: %s", username, exception)
             return None
 
     def get_by_id(self, anilist_id):
