@@ -182,7 +182,8 @@ class PlexAnilistSync:
                             LOGGER.warning("Anime %s not found", anilistId)
                 else:
                     LOGGER.warning(
-                        "Could not match id from Plex guid with anilist id: %s",
+                        "Could not match id from Plex guid with anilist id: %s: %s",
+                        plex_anime_entry.title,
                         plex_anime_entry.guid,
                     )
             LOGGER.info("Synchronization for %s finished", self.anilist_user)

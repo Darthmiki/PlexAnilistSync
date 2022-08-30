@@ -4,3 +4,12 @@ services:
     build: .
     container_name: plex_anilist_sync
     restart: always
+    environment:
+      - ANILIST_TOKEN=
+      - ANILIST_USERNAME=
+      - PLEX_USERNAME=
+      - PLEX_PASSWORD=
+      - PLEX_SERVER_NAME=
+      - PLEX_SECTION_NAME=
+      - LIST_UPDATE_INTERVAL=
+      - SHOW_BAD_PLEX_MAPPINGS=False
